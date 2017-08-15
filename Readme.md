@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Андрей Иванов](https://up.htmlacademy.ru/javascript/10/user/238875).
-* Наставник: `Неизвестно`.
+* Наставник: `Максим Галышкин`.
 
 ---
 
