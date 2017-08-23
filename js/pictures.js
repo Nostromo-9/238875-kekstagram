@@ -9,9 +9,13 @@ var COMMENTS = [
   'Лица у людей на фотке перекошены, как-будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
 
-function randomComment(array) {  // функция выбора случайного комментария из массива
+function randomElement(array) {  // функция выбора случайного элемента из массива
   var rand = Math.floor(Math.random() * array.length);
   return array[rand];
+}
+
+function randomRange(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function createPicturesArray(length) {  // функция создания массива JS-объектов
@@ -19,10 +23,10 @@ function createPicturesArray(length) {  // функция создания ма�
   for (var i = 0; i < length; i++) {
     var randomPicture = {
       url: 'photos/' + (i + 1) + '.jpg',
-      likes: 15 + Math.floor(Math.random() * (200 + 1 - 15)),
+      likes: randomRange(15, 200),
       comments: [
-        randomComment(COMMENTS),
-        randomComment(COMMENTS)
+        randomElement(COMMENTS),
+        randomElement(COMMENTS)
       ]
     };
     array.push(randomPicture);
