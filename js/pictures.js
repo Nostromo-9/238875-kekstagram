@@ -9,6 +9,9 @@ var COMMENTS = [
   'Лица у людей на фотке перекошены, как-будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
 
+var ESC_KEYCODE = 27;
+var ENTER_KEYCODE = 13;
+
 function randomElement(array) {  // функция выбора случайного элемента из массива
   var rand = Math.floor(Math.random() * array.length);
   return array[rand];
@@ -52,6 +55,17 @@ function fillPicturesFragment(picturesArray) {  // функция заполне
   return fragment;
 }
 
+function closeOverlay() {  // функция закрытия картинки с удалением обработчика нажатия 'Esc'
+  galleryOverlay.classList.add('hidden');
+  document.removeEventListener('keydown', onOverlayEscPress);
+}
+
+function onOverlayEscPress(evt) {  // функция обработки нажатия 'Esc' при открытой картинке
+  if (evt.keyCode === ESC_KEYCODE) {
+    closeOverlay();
+  }
+}
+
 var pictureElementsBlock = document.body.querySelector('.pictures');  // место отрисовки сгенерированных DOM-элементов
 var galleryOverlay = document.querySelector('.gallery-overlay');  // место для отрисовки первого элемента JS-массива
 var randomPicturesArray = createPicturesArray(25);
@@ -60,7 +74,31 @@ pictureElementsBlock.appendChild(fillPicturesFragment(randomPicturesArray));
 
 document.querySelector('.upload-overlay').classList.add('hidden');
 
-galleryOverlay.querySelector('.gallery-overlay-image').src = randomPicturesArray[0].url;
-galleryOverlay.querySelector('.likes-count').textContent = randomPicturesArray[0].likes;
-galleryOverlay.querySelector('.comments-count').textContent = randomPicturesArray[0].comments.length;
-galleryOverlay.classList.remove('hidden');
+var galleryOverlayClose = galleryOverlay.querySelector('.gallery-overlay-close');
+
+pictureElementsBlock.onclick = function (evt) {  // Нажатие на любой элемент .picture удаляет класс .invisible у блока .gallery-overlay
+  var target = evt.target;
+  evt.preventDefault();
+  while (target !== this) {
+    if (target.className === 'picture') {
+      galleryOverlay.querySelector('.gallery-overlay-image').src = target.querySelector('img').src;
+      galleryOverlay.querySelector('.likes-count').textContent = target.querySelector('.picture-likes').textContent;
+      galleryOverlay.querySelector('.comments-count').textContent = target.querySelector('.picture-comments').textContent;
+
+      galleryOverlay.classList.remove('hidden');
+      document.addEventListener('keydown', onOverlayEscPress);
+      return;
+    }
+    target = target.parentNode;
+  }
+};
+
+galleryOverlayClose.addEventListener('click', function () {
+  closeOverlay();
+});
+
+galleryOverlayClose.addEventListener('keydown', function (anotherEvt) {
+  if (anotherEvt.keyCode === ENTER_KEYCODE) {
+    closeOverlay();
+  }
+});
