@@ -72,11 +72,22 @@ var randomPicturesArray = createPicturesArray(25);
 
 pictureElementsBlock.appendChild(fillPicturesFragment(randomPicturesArray));
 
-document.querySelector('.upload-overlay').classList.add('hidden');
-
 var galleryOverlayClose = galleryOverlay.querySelector('.gallery-overlay-close');
 
-pictureElementsBlock.onclick = function (evt) {  // Нажатие на любой элемент .picture удаляет класс .invisible у блока .gallery-overlay
+var uploadForm = document.getElementById('upload-select-image');  // форма загрузки изображения
+var uploadField = document.getElementById('upload-file');  // поле загрузки файла
+var uploadFormClose = uploadForm.querySelector('.upload-form-cancel');  // кнопка закрытия формы загрузки изображения
+var uploadFormSubmit = uploadForm.querySelector('.upload-form-submit');  // кнопка отправки загруженного изображения
+var uploadDescription = uploadForm.querySelector('.upload-form-description');  // форма ввода комментария
+
+var effectTabs = uploadForm.querySelector('.upload-effect-controls');  // поле выбора эффектов обработки изображения
+
+var resizeDec = uploadForm.querySelector('.upload-resize-controls-button-dec');  // кнопка уменьшения изображения
+var resizeInc = uploadForm.querySelector('.upload-resize-controls-button-inc');  // кнопка увеличения изображения
+var resizeValue = uploadForm.querySelector('.upload-resize-controls-value');  // поле со значением масштаба изображения
+
+// Нажатие на любой элемент .picture удаляет класс .invisible у блока .gallery-overlay
+pictureElementsBlock.onclick = function (evt) {
   var target = evt.target;
   evt.preventDefault();
   while (target !== this) {
@@ -93,12 +104,74 @@ pictureElementsBlock.onclick = function (evt) {  // Нажатие на любо
   }
 };
 
+// обработчик нажатия на закрывающий элемент окна .gallery-overlay
 galleryOverlayClose.addEventListener('click', function () {
   closeOverlay();
 });
 
+// обработчик нажатия 'Enter' на закрывающий элемент окна .gallery-overlay
 galleryOverlayClose.addEventListener('keydown', function (anotherEvt) {
   if (anotherEvt.keyCode === ENTER_KEYCODE) {
     closeOverlay();
   }
 });
+
+// --------- Обработчики событий загрузки и обработки изображений ---------
+
+uploadField.addEventListener('change', function () {
+  uploadForm.querySelector('.upload-image').classList.add('hidden');
+  uploadForm.querySelector('.upload-overlay').classList.remove('hidden');
+
+  document.addEventListener('keydown', function (evt) {
+    if (evt.keyCode === ESC_KEYCODE) {
+      uploadForm.querySelector('.upload-overlay').classList.add('hidden');
+      uploadForm.querySelector('.upload-image').classList.remove('hidden');
+    }
+  });
+});
+
+uploadFormClose.addEventListener('click', function () {
+  uploadForm.querySelector('.upload-overlay').classList.add('hidden');
+  uploadForm.querySelector('.upload-image').classList.remove('hidden');
+});
+
+// если фокус находится на форме ввода комментария, то 'Esc' не закрывает форму .upload-overlay
+uploadDescription.addEventListener('keydown', function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    evt.stopPropagation();
+  }
+});
+
+effectTabs.onclick = function (evt) {
+  var target = evt.target;
+  evt.preventDefault();
+  while (target !== this) {
+    if (target.className === 'upload-effect-label') {
+      uploadForm.querySelector('.effect-image-preview').classList.add('.effect-chrome');
+      return;
+    }
+    target = target.parentNode;
+  }
+};
+
+// обработчик нажатия кнопки уменьшения загружаемого изображения
+resizeDec.addEventListener('click', function () {
+  var value = +resizeValue.value.substr(0, resizeValue.value.length - 1);  // числовое значение поля масштаба изображения
+  if ((value <= 100) && (value > 25)) {
+    resizeValue.value = value - 25 + '%';
+    uploadForm.querySelector('.effect-image-preview').style = 'transform: scale(' + 0.01 * (value - 25) + ')';
+  }
+});
+
+// обработчик нажатия кнопки увеличения загружаемого изображения
+resizeInc.addEventListener('click', function () {
+  var value = +resizeValue.value.substr(0, resizeValue.value.length - 1);  // числовое значение поля масштаба изображения
+  if ((value < 100) && (value >= 25)) {
+    resizeValue.value = value + 25 + '%';
+    uploadForm.querySelector('.effect-image-preview').style = 'transform: scale(' + 0.01 * (value + 25) + ')';
+  }
+});
+
+// при изменении значения поля загрузки фотографии #upload-file
+// в форме #upload-select-image, показывается форма кадрирования изображения .upload-overlay,
+// а форма загрузки скрывается .upload-image
