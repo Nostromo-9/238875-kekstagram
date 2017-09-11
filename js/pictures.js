@@ -11,6 +11,8 @@ var COMMENTS = [
 
 var ESC_KEYCODE = 27;
 var ENTER_KEYCODE = 13;
+var MIN_SCALE = 25;
+var MAX_SCALE = 100;
 
 function randomElement(array) {  // функция выбора случайного элемента из массива
   var rand = Math.floor(Math.random() * array.length);
@@ -81,6 +83,7 @@ var uploadFormSubmit = uploadForm.querySelector('.upload-form-submit');  // кн
 var uploadDescription = uploadForm.querySelector('.upload-form-description');  // форма ввода комментария
 
 var effectTabs = uploadForm.querySelector('.upload-effect-controls');  // поле выбора эффектов обработки изображения
+var imagePreview = uploadForm.querySelector('.effect-image-preview');  // получившееся после наложения эффектов изображение
 
 var resizeDec = uploadForm.querySelector('.upload-resize-controls-button-dec');  // кнопка уменьшения изображения
 var resizeInc = uploadForm.querySelector('.upload-resize-controls-button-inc');  // кнопка увеличения изображения
@@ -142,12 +145,21 @@ uploadDescription.addEventListener('keydown', function (evt) {
   }
 });
 
+// обработчик применения эффекта к изображению, реализовано одновременное наложение только 1 эффекта
 effectTabs.onclick = function (evt) {
   var target = evt.target;
+  var defaultClassList = 'effect-image-preview';  // classList изображения по-умолчанию, без эффектов
+
   evt.preventDefault();
   while (target !== this) {
-    if (target.className === 'upload-effect-label') {
-      uploadForm.querySelector('.effect-image-preview').classList.add('.effect-chrome');
+    if (target.classList.contains('upload-effect-label')) {
+      if (target.classList.length > 1) {  // если нажали на label с эффектом
+        var effect = 'effect-' + target.classList[1].slice(20, target.classList[1].length);
+        imagePreview.classList = defaultClassList;  // 'зачищаем' classList от предыдущих эффектов
+        imagePreview.classList.add(effect);
+      } else {
+        imagePreview.classList = defaultClassList;  // 'зачищаем' classList от предыдущих эффектов
+      }
       return;
     }
     target = target.parentNode;
@@ -157,7 +169,7 @@ effectTabs.onclick = function (evt) {
 // обработчик нажатия кнопки уменьшения загружаемого изображения
 resizeDec.addEventListener('click', function () {
   var value = +resizeValue.value.substr(0, resizeValue.value.length - 1);  // числовое значение поля масштаба изображения
-  if ((value <= 100) && (value > 25)) {
+  if ((value <= MAX_SCALE) && (value > MIN_SCALE)) {
     resizeValue.value = value - 25 + '%';
     uploadForm.querySelector('.effect-image-preview').style = 'transform: scale(' + 0.01 * (value - 25) + ')';
   }
@@ -166,7 +178,7 @@ resizeDec.addEventListener('click', function () {
 // обработчик нажатия кнопки увеличения загружаемого изображения
 resizeInc.addEventListener('click', function () {
   var value = +resizeValue.value.substr(0, resizeValue.value.length - 1);  // числовое значение поля масштаба изображения
-  if ((value < 100) && (value >= 25)) {
+  if ((value < MAX_SCALE) && (value >= MIN_SCALE)) {
     resizeValue.value = value + 25 + '%';
     uploadForm.querySelector('.effect-image-preview').style = 'transform: scale(' + 0.01 * (value + 25) + ')';
   }
