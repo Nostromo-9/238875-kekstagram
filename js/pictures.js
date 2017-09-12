@@ -57,6 +57,26 @@ function fillPicturesFragment(picturesArray) {  // функция заполне
   return fragment;
 }
 
+// функция проверки поля хэш-тэгов
+function checkHashTags() {
+  var tagsArray = hashTags.value.split(' ');
+  if (tagsArray.length > 5) {  // проверка общего количества хэш-тэгов
+    return false;
+  }
+  for (var i = 0; i < tagsArray.length; i++) {
+    var hashTag = tagsArray[i];
+    if ((hashTag.length > 20) || (hashTag.substr(0, 1) !== '#')) {  // проверка первого символа и длины хэш-тэга
+      return false;
+    }
+    for (var j = i + 1; j < tagsArray.length; j++) {  // проверка уникальности хэш-тэгов
+      if (tagsArray[j] === hashTag) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function closeOverlay() {  // функция закрытия картинки с удалением обработчика нажатия 'Esc'
   galleryOverlay.classList.add('hidden');
   document.removeEventListener('keydown', onOverlayEscPress);
@@ -81,6 +101,7 @@ var uploadField = document.getElementById('upload-file');  // поле загр�
 var uploadFormClose = uploadForm.querySelector('.upload-form-cancel');  // кнопка закрытия формы загрузки изображения
 var uploadFormSubmit = uploadForm.querySelector('.upload-form-submit');  // кнопка отправки загруженного изображения
 var uploadDescription = uploadForm.querySelector('.upload-form-description');  // форма ввода комментария
+var hashTags = uploadForm.querySelector('.upload-form-hashtags');  // форма ввода хэш-тэгов
 
 var effectTabs = uploadForm.querySelector('.upload-effect-controls');  // поле выбора эффектов обработки изображения
 var imagePreview = uploadForm.querySelector('.effect-image-preview');  // получившееся после наложения эффектов изображение
@@ -157,7 +178,7 @@ effectTabs.onclick = function (evt) {
         var effect = 'effect-' + target.classList[1].slice(20, target.classList[1].length);
         imagePreview.classList = defaultClassList;  // 'зачищаем' classList от предыдущих эффектов
         imagePreview.classList.add(effect);
-      } else {
+      } else {  // если нажали на label с оригинальным изображением
         imagePreview.classList = defaultClassList;  // 'зачищаем' classList от предыдущих эффектов
       }
       return;
@@ -184,6 +205,11 @@ resizeInc.addEventListener('click', function () {
   }
 });
 
-// при изменении значения поля загрузки фотографии #upload-file
-// в форме #upload-select-image, показывается форма кадрирования изображения .upload-overlay,
-// а форма загрузки скрывается .upload-image
+// обработчик нажатия кнопки отправки изображения
+uploadFormSubmit.addEventListener('click', function (evt) {
+  if (!checkHashTags()) {  // проверка поля хэш-тэгов
+    evt.preventDefault();
+    hashTags.style = 'outline: 2px dashed red';
+    hashTags.value = 'некорректный хэш-тег!';
+  }
+});
