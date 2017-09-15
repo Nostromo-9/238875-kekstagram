@@ -15,15 +15,16 @@
   var EFFECT_DEFAULT_LEVEL = 20;
 
   // функция добавления эффекта изображению
-  function changeEffectLevel(effectType, percentage) {
+  function setEffectLevel(effectType, percentage) {
     var effectStyleAddition = {
-      chrome: 'grayscale(' + 0.01 * percentage + ')',
-      sepia: 'sepia(' + 0.01 * percentage + ')',
-      marvin: 'invert(' + percentage + '%)',
-      phobos: 'blur(' + 0.03 * percentage + 'px)',
-      heat: 'brightness(' + 0.03 * percentage + ')'
+      chrome: 'filter: grayscale(' + 0.01 * percentage + ')',
+      sepia: 'filter: sepia(' + 0.01 * percentage + ')',
+      marvin: 'filter: invert(' + percentage + '%)',
+      phobos: 'filter: blur(' + 0.03 * percentage + 'px)',
+      heat: 'filter: brightness(' + 0.03 * percentage + ')',
+      none: ''
     };
-    imagePreview.style = 'filter: ' + effectStyleAddition[effectType];
+    imagePreview.style = effectStyleAddition[effectType];
   }
 
   // функция проверки поля хэш-тэгов
@@ -90,32 +91,23 @@
     }
   });
 
-  // обработчик применения эффекта к изображению, реализовано одновременное наложение только 1 эффекта
+  // обработчик применения эффекта к изображению
   effectTabs.onclick = function (evt) {
-    var target = evt.target;
     var defaultClassList = 'effect-image-preview';  // classList изображения по-умолчанию, без эффектов
+    if (evt.target.tagName === 'INPUT') {
+      window.effectType = evt.target.value;
+      imagePreview.classList = defaultClassList;  // 'зачищаем' classList от предыдущих эффектов
+      imagePreview.classList.add('effect-' + window.effectType);
 
-    evt.preventDefault();
-    while (target !== this) {
-      if (target.classList.contains('upload-effect-label')) {
-        if (target.classList.length > 1) {  // если нажали на label с эффектом
-          window.effectType = target.classList[1].slice(20, target.classList[1].length);
-          imagePreview.classList = defaultClassList;  // 'зачищаем' classList от предыдущих эффектов
-          imagePreview.classList.add('effect-' + window.effectType);
-          document.getElementById('upload-effect-' + window.effectType).checked = true;  // выделение иконки выбранного фильтра
+      effectLevelPin.style.left = EFFECT_DEFAULT_LEVEL + '%';  // задание значений насыщенности эффекта по-умолчанию
+      effectLevelValue.style.width = EFFECT_DEFAULT_LEVEL + '%';
 
-          effectLevel.classList.remove('hidden');  // появляется ползунок, регулирующий насыщенность эффекта
-          effectLevelPin.style.left = EFFECT_DEFAULT_LEVEL + '%';  // задание значений насыщенности эффекта по-умолчанию
-          effectLevelValue.style.width = EFFECT_DEFAULT_LEVEL + '%';
-
-        } else {  // если нажали на label с оригинальным изображением
-          imagePreview.classList = defaultClassList;  // 'зачищаем' classList от предыдущих эффектов
-          document.getElementById('upload-effect-none').checked = true;  // выделение иконки отсутствия фильтров
-          effectLevel.classList.add('hidden');  // исчезает ползунок, регулирующий насыщенность эффекта
-        }
-        return;
+      if (window.effectType !== 'none') {
+        effectLevel.classList.remove('hidden');  // появляется ползунок, регулирующий насыщенность эффекта
+      } else {
+        effectLevel.classList.add('hidden');  // исчезает ползунок, регулирующий насыщенность эффекта
       }
-      target = target.parentNode;
+      setEffectLevel(window.effectType, EFFECT_DEFAULT_LEVEL);
     }
   };
 
@@ -169,7 +161,7 @@
       effectLevelPin.style.left = levelPercentage + '%';
       effectLevelValue.style.width = levelPercentage + '%';
 
-      changeEffectLevel(window.effectType, levelPercentage);
+      setEffectLevel(window.effectType, levelPercentage);
     };
 
     var onMouseUp = function (upEvt) {
