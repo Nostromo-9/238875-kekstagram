@@ -27,6 +27,16 @@
     imagePreview.style = effectStyleAddition[effectType];
   }
 
+  // callback-функция изменения размера изображения
+  function resizeImage(image, size, step) {
+    var startSize = +size.value.substr(0, size.value.length - 1);  // числовое значение поля масштаба изображения
+    var endSize = startSize + step;
+    if ((endSize <= MAX_SCALE) && (endSize >= MIN_SCALE)) {
+      size.value = endSize + '%';
+      image.style = 'transform: scale(' + 0.01 * endSize + ')';
+    }
+  }
+
   // функция проверки поля хэш-тэгов
   function checkHashTags() {
     var tagsArray = hashTags.value.split(' ');
@@ -47,7 +57,6 @@
     return true;
   }
 
-
   var uploadForm = document.getElementById('upload-select-image');  // форма загрузки изображения
   var uploadField = document.getElementById('upload-file');  // поле загрузки файла
   var uploadFormClose = uploadForm.querySelector('.upload-form-cancel');  // кнопка закрытия формы загрузки изображения
@@ -57,10 +66,6 @@
 
   var effectTabs = uploadForm.querySelector('.upload-effect-controls');  // поле выбора эффектов обработки изображения
   var imagePreview = uploadForm.querySelector('.effect-image-preview');  // получившееся после наложения эффектов изображение
-
-  var resizeDec = uploadForm.querySelector('.upload-resize-controls-button-dec');  // кнопка уменьшения изображения
-  var resizeInc = uploadForm.querySelector('.upload-resize-controls-button-inc');  // кнопка увеличения изображения
-  var resizeValue = uploadForm.querySelector('.upload-resize-controls-value');  // поле со значением масштаба изображения
 
   var effectLevel = uploadForm.querySelector('.upload-effect-level');  // область регулировки насыщенности фильтра
   var effectLevelPin = effectLevel.querySelector('.upload-effect-level-pin');  // ползунок насыщенности фильтра
@@ -111,23 +116,7 @@
     }
   };
 
-  // обработчик нажатия кнопки уменьшения загружаемого изображения
-  resizeDec.addEventListener('click', function () {
-    var value = +resizeValue.value.substr(0, resizeValue.value.length - 1);  // числовое значение поля масштаба изображения
-    if ((value <= MAX_SCALE) && (value > MIN_SCALE)) {
-      resizeValue.value = value - SCALE_STEP + '%';
-      imagePreview.style = 'transform: scale(' + 0.01 * (value - SCALE_STEP) + ')';
-    }
-  });
-
-  // обработчик нажатия кнопки увеличения загружаемого изображения
-  resizeInc.addEventListener('click', function () {
-    var value = +resizeValue.value.substr(0, resizeValue.value.length - 1);  // числовое значение поля масштаба изображения
-    if ((value < MAX_SCALE) && (value >= MIN_SCALE)) {
-      resizeValue.value = value + SCALE_STEP + '%';
-      imagePreview.style = 'transform: scale(' + 0.01 * (value + SCALE_STEP) + ')';
-    }
-  });
+  window.initializeScale(resizeImage, -SCALE_STEP, SCALE_STEP);
 
   // обработчик нажатия кнопки отправки изображения
   uploadFormSubmit.addEventListener('click', function (evt) {
