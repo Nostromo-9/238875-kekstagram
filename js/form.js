@@ -4,10 +4,6 @@
 
   var ESC_KEYCODE = 27;
 
-  var MIN_SCALE = 25;
-  var MAX_SCALE = 100;
-  var SCALE_STEP = 25;
-
   var MAX_HASHTAG_LENGTH = 20;
   var MAX_HASHTAGS_QTY = 5;
 
@@ -48,13 +44,8 @@
   }
 
   // callback-функция изменения размера изображения
-  function resizeImage(image, size, step) {
-    var startSize = +size.value.substr(0, size.value.length - 1);  // числовое значение поля масштаба изображения
-    var endSize = startSize + step;
-    if ((endSize <= MAX_SCALE) && (endSize >= MIN_SCALE)) {
-      size.value = endSize + '%';
-      image.style = 'transform: scale(' + 0.01 * endSize + ')';
-    }
+  function adjustScale(scaleValue) {
+    imagePreview.style.transform = 'scale(' + scaleValue / 100 + ')';
   }
 
   // функция проверки поля хэш-тэгов
@@ -85,6 +76,7 @@
   var hashTags = uploadForm.querySelector('.upload-form-hashtags');  // форма ввода хэш-тэгов
 
   var imagePreview = uploadForm.querySelector('.effect-image-preview');  // получившееся после наложения эффектов изображение
+  var scaleControls = document.querySelector('.upload-resize-controls');  // блок управления размером изображения
 
   var effectLevel = uploadForm.querySelector('.upload-effect-level');  // область регулировки насыщенности фильтра
   var effectLevelPin = effectLevel.querySelector('.upload-effect-level-pin');  // ползунок насыщенности фильтра
@@ -116,7 +108,7 @@
   });
 
   window.initializeFilters(onEffectTabsClick);
-  window.initializeScale(resizeImage, -SCALE_STEP, SCALE_STEP);
+  window.initializeScale(scaleControls, adjustScale);
 
   // обработчик нажатия кнопки отправки изображения
   uploadFormSubmit.addEventListener('click', function (evt) {
@@ -150,7 +142,7 @@
       effectLevelPin.style.left = levelPercentage + '%';
       effectLevelValue.style.width = levelPercentage + '%';
 
-      setEffectLevel(imagePreview, window.effectType, levelPercentage);
+      setEffectLevel(window.effectType, levelPercentage);
     };
 
     var onMouseUp = function (upEvt) {
