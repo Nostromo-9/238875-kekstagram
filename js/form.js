@@ -142,7 +142,7 @@
       effectLevelPin.style.left = levelPercentage + '%';
       effectLevelValue.style.width = levelPercentage + '%';
 
-      setEffectLevel(window.effectType, levelPercentage);
+      setEffectLevel(imagePreview, window.effectType, levelPercentage);
     };
 
     var onMouseUp = function (upEvt) {
